@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101b35">
+<title>Finanças — Controle mensal</title>
+<style>
+:root{
+ --bg:#f3f5fa;--surface:#fff;--ink:#172033;--muted:#778198;--line:#e8ecf3;
+ --navy:#101b35;--blue:#4263eb;--blue-soft:#edf1ff;--green:#168653;--green-bg:#e8f7ef;
+ --yellow:#a96d00;--yellow-bg:#fff5dc;--red:#c43d4b;--red-bg:#fff0f1;
+ --shadow:0 12px 35px rgba(24,39,75,.06)
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+button,input{font:inherit}
+.app{min-height:100vh}
+.header{background:var(--navy);color:#fff;padding:28px max(22px,calc((100% - 1120px)/2)) 68px}
+.header-inner{max-width:1120px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#6e8bff,#3d5be4);display:grid;place-items:center;font-size:22px;box-shadow:0 8px 20px #4263eb55}
+.brand h1{font-size:20px;margin:0;font-weight:750;letter-spacing:-.4px}
+.brand p{margin:4px 0 0;color:#aeb9d3;font-size:12px}
+.header-right{display:flex;align-items:center;gap:12px}
+.save-state{font-size:12px;color:#c5d0e6;display:flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;background:#42d392;border-radius:50%;box-shadow:0 0 0 4px #42d39220}
+.month-wrap{background:#202d4c;border:1px solid #344363;border-radius:11px;padding:8px 11px}
+.month-wrap label{display:block;color:#aeb9d3;font-size:10px;margin-bottom:3px}
+.month-wrap input{border:0;background:transparent;color:white;outline:0;font-weight:650}
+.month-wrap input::-webkit-calendar-picker-indicator{filter:invert(1)}
+.main{max-width:1120px;margin:-42px auto 50px;padding:0 22px}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);font-weight:800;margin:0 0 12px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:25px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:19px 20px;box-shadow:var(--shadow);min-width:0}
+.stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;font-weight:650}
+.stat-icon{width:30px;height:30px;border-radius:10px;background:#f1f3f8;display:grid;place-items:center;font-size:15px}
+.stat-value{font-size:clamp(19px,2.4vw,25px);font-weight:800;letter-spacing:-.7px;margin-top:12px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.stat-foot{font-size:11px;color:#9aa3b4;margin-top:5px}
+.stat.balance{border:1px solid transparent}
+.stat.balance.positive{background:var(--green-bg);color:var(--green);border-color:#ccebd9}
+.stat.balance.caution{background:var(--yellow-bg);color:var(--yellow);border-color:#f1dfae}
+.stat.balance.negative{background:var(--red-bg);color:var(--red);border-color:#f3cdd1}
+.stat.balance .stat-icon{background:#ffffff9c}
+.layout{display:grid;grid-template-columns: .85fr 1.15fr;gap:18px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.panel-title{font-size:16px;font-weight:800;margin:0;letter-spacing:-.2px}
+.panel-sub{font-size:12px;color:var(--muted);margin:5px 0 0}
+.pill{font-size:10px;font-weight:750;padding:6px 9px;border-radius:20px;background:var(--blue-soft);color:var(--blue)}
+.group-title{font-size:10px;color:#929bad;letter-spacing:1px;text-transform:uppercase;font-weight:800;margin:21px 0 8px}
+.group-title:first-of-type{margin-top:0}
+.entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #f0f2f6}
+.entry:last-child{border-bottom:0}
+.entry-name{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:620}
+.entry-icon{width:30px;height:30px;border-radius:9px;background:#f4f6fa;display:grid;place-items:center;font-size:14px;flex:0 0 auto}
+.entry input{width:145px;max-width:48%;padding:10px 11px;border:1px solid #e4e8f0;background:#fbfcfe;border-radius:10px;text-align:right;color:var(--ink);font-weight:650;font-size:13px;outline:0;transition:.15s}
+.entry input:focus{border-color:#8297ff;background:#fff;box-shadow:0 0 0 3px #4263eb16}
+.entry input::placeholder{color:#b2bac8;font-weight:450}
+.total-row{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:16px;margin-top:14px;font-size:13px;font-weight:800}
+.total-row strong{font-size:16px;font-variant-numeric:tabular-nums}
+.income-panel .entry-icon{background:#edf8f2}
+.expense-panel .entry-icon{background:#f4f5fa}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.tip{font-size:11px;color:#929bad;line-height:1.5;max-width:570px}
+.action-buttons{display:flex;gap:9px;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:750;cursor:pointer;transition:.15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-light{background:#e9edf5;color:#45516a}.btn-primary{background:var(--blue);color:#fff;box-shadow:0 5px 13px #4263eb30}
+.footer{text-align:center;color:#a0a8b7;font-size:11px;margin-top:24px}
+@media(max-width:850px){.summary{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}}
+@media(max-width:520px){.header{padding:20px 17px 65px}.header-inner{align-items:flex-start;flex-direction:column}.header-right{width:100%;justify-content:space-between}.main{padding:0 13px}.summary{gap:9px}.stat{padding:14px}.panel{padding:17px}.stat-value{font-size:19px}.brand h1{font-size:18px}}
+@media print{body{background:#fff}.header{padding:20px;background:#fff;color:#111}.brand p,.save-state,.actions,.footer{display:none}.main{margin:0 auto}.stat,.panel{box-shadow:none;break-inside:avoid}.layout{grid-template-columns:1fr 1fr}.stat{border:1px solid #ddd!important}.stat.balance.positive,.stat.balance.caution,.stat.balance.negative{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+ <div class="header-inner">
+  <div class="brand">
+   <div class="logo">↗</div>
+   <div><h1>Meu financeiro</h1><p>Seu dinheiro sob controle, mês a mês.</p></div>
+  </div>
+  <div class="header-right">
+   <div class="save-state"><span class="dot"></span><span id="saveText">Salvo automaticamente</span></div>
+   <div class="month-wrap"><label for="month">MÊS DE REFERÊNCIA</label><input id="month" type="month"></div>
+  </div>
+ </div>
+</header>
+
+<main class="main">
+ <p class="section-label">Visão geral</p>
+ <section class="summary" aria-live="polite">
+  <article class="stat">
+   <div class="stat-top"><span>Renda total</span><span class="stat-icon">↗</span></div>
+   <div class="stat-value" id="sumIncome">R$ 0,00</div><div class="stat-foot">Soma das duas fontes de renda</div>
+  </article>
+  <article class="stat">
+   <div class="stat-top"><span>Total de saídas</span><span class="stat-icon">↘</span></div>
+   <div class="stat-value" id="sumOut">R$ 0,00</div><div class="stat-foot">Despesas + dinheiro guardado</div>
+  </article>
+  <article class="stat">
+   <div class="stat-top"><span>Dinheiro disponível</span><span class="stat-icon">◉</span></div>
+   <div class="stat-value" id="sumLeft">R$ 0,00</div><div class="stat-foot">Quanto restou depois das saídas</div>
+  </article>
+  <article class="stat balance caution" id="balanceCard">
+   <div class="stat-top"><span id="balanceLabel">Saldo do mês</span><span class="stat-icon">✓</span></div>
+   <div class="stat-value" id="balance">R$ 0,00</div><div class="stat-foot" id="balanceFoot">Acompanhe seu resultado mensal</div>
+  </article>
+ </section>
+
+ <section class="layout">
+  <article class="panel income-panel">
+   <div class="panel-head"><div><h2 class="panel-title">Entradas</h2><p class="panel-sub">Dinheiro que entra no mês</p></div><span class="pill">RENDAS</span></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">💼</span>Renda R</div><input id="incomeR" class="money income" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Valor da Renda R"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">💻</span>Renda N</div><input id="incomeN" class="money income" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Valor da Renda N"></div>
+   <div class="total-row"><span>Total de rendas</span><strong id="incomeTotal">R$ 0,00</strong></div>
+  </article>
+
+  <article class="panel expense-panel">
+   <div class="panel-head"><div><h2 class="panel-title">Despesas e reservas</h2><p class="panel-sub">Registre seus compromissos e gastos</p></div><span class="pill">SAÍDAS</span></div>
+   <div class="group-title">Gastos fixos</div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">🏠</span>Aluguel</div><input id="rent" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Aluguel"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">💡</span>Energia</div><input id="energy" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Energia"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">🛒</span>Comida</div><input id="food" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Comida"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">📚</span>FIES</div><input id="fies" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="FIES"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">💳</span>Cartão</div><input id="card" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Cartão"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">🏍️</span>Moto</div><input id="motorcycle" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Moto"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">🤝</span>Empréstimo</div><input id="loan" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Empréstimo"></div>
+   <div class="group-title">Controle adicional</div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">🧾</span>Gastos variáveis</div><input id="variable" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Gastos variáveis"></div>
+   <div class="entry"><div class="entry-name"><span class="entry-icon">🐷</span>Dinheiro guardado</div><input id="saved" class="money expense" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" aria-label="Dinheiro guardado"></div>
+   <div class="total-row"><span>Total de saídas</span><strong id="expenseTotal">R$ 0,00</strong></div>
+  </article>
+ </section>
+
+ <div class="actions">
+  <div class="tip">🔒 Seus dados são salvos automaticamente neste navegador, inclusive ao fechar a página. Use sempre o mesmo navegador e dispositivo para encontrar seus valores.</div>
+  <div class="action-buttons"><button class="btn btn-light" id="clear">Limpar mês</button><button class="btn btn-primary" id="print">Imprimir / salvar PDF</button></div>
+ </div>
+ <div class="footer">Controle financeiro pessoal · Seus dados ficam no seu dispositivo</div>
+</main>
+</div>
+<script>
+const ids=['incomeR','incomeN','rent','energy','food','fies','card','motorcycle','loan','variable','saved'];
+const expenseIds=['rent','energy','food','fies','card','motorcycle','loan','variable','saved'];
+const brl=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const monthEl=document.getElementById('month');
+const currentMonth=()=>monthEl.value || new Date().toISOString().slice(0,7);
+const storageKey=()=>`meuFinanceiro_v2_${currentMonth()}`;
+let saveTimer;
+function readValues(){
+ try{return JSON.parse(localStorage.getItem(storageKey())||'{}')}catch(e){return {}}
+}
+function saveValues(){
+ const data={};
+ ids.forEach(id=>data[id]=document.getElementById(id).value);
+ try{
+  localStorage.setItem(storageKey(),JSON.stringify(data));
+  localStorage.setItem('meuFinanceiro_lastMonth',currentMonth());
+  document.getElementById('saveText').textContent='Salvo automaticamente';
+ }catch(e){document.getElementById('saveText').textContent='Não foi possível salvar';}
+}
+function loadMonth(){
+ const data=readValues();
+ ids.forEach(id=>document.getElementById(id).value=data[id]??'');
+ calculate();
+}
+function scheduleSave(){
+ document.getElementById('saveText').textContent='Salvando…';
+ clearTimeout(saveTimer);
+ saveTimer=setTimeout(saveValues,120);
+}
+function val(id){return Math.max(0,Number(document.getElementById(id).value)||0)}
+function calculate(){
+ const income=val('incomeR')+val('incomeN');
+ const expenses=expenseIds.reduce((total,id)=>total+val(id),0);
+ const balance=income-expenses;
+ document.getElementById('sumIncome').textContent=brl(income);
+ document.getElementById('sumOut').textContent=brl(expenses);
+ document.getElementById('sumLeft').textContent=brl(balance);
+ document.getElementById('incomeTotal').textContent=brl(income);
+ document.getElementById('expenseTotal').textContent=brl(expenses);
+ document.getElementById('balance').textContent=brl(balance);
+ const card=document.getElementById('balanceCard');
+ card.classList.remove('positive','caution','negative');
+ if(balance<0){
+  card.classList.add('negative');
+  document.getElementById('balanceLabel').textContent='Saldo negativo';
+  document.getElementById('balanceFoot').textContent='As saídas passaram das rendas';
+ }else if(balance<=300){
+  card.classList.add('caution');
+  document.getElementById('balanceLabel').textContent='Atenção ao saldo';
+  document.getElementById('balanceFoot').textContent='Restaram R$ 300,00 ou menos';
+ }else{
+  card.classList.add('positive');
+  document.getElementById('balanceLabel').textContent='Saldo positivo';
+  document.getElementById('balanceFoot').textContent='Você tem mais de R$ 300,00 disponíveis';
+ }
+}
+ids.forEach(id=>document.getElementById(id).addEventListener('input',()=>{calculate();scheduleSave()}));
+monthEl.addEventListener('change',loadMonth);
+document.getElementById('clear').addEventListener('click',()=>{
+ if(confirm('Apagar os valores deste mês? Essa ação não apaga os outros meses.')){
+  ids.forEach(id=>document.getElementById(id).value='');
+  calculate();saveValues();
+ }
+});
+document.getElementById('print').addEventListener('click',()=>window.print());
+try{
+ monthEl.value=localStorage.getItem('meuFinanceiro_lastMonth')||new Date().toISOString().slice(0,7);
+}catch(e){monthEl.value=new Date().toISOString().slice(0,7)}
+loadMonth();
+</script>
+</body>
+</html>
